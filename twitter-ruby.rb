@@ -1,0 +1,528 @@
+#!/usr/bin/ruby
+
+class TwitterAPI
+	require 'net/http'
+	require 'json'
+	require 'oauth'
+	require 'cgi'
+	include Net
+	private
+	def ensureArgs(spec);return false unless spec.is_a?(Hash);spec.each_key{|k|(raise(ArgumentError, "Request parameters not in a hash")) unless k.is_a?(spec[k])};return true;end
+	def key?(a,k);a[k]==nil ? false : true;end
+	def updatePost(*k);rqs=Hash.new;k.each{|hk|rqs[hk]=k[hk] if k[hk]!=nil};return rqs;end
+	def paramsGetRq(domain,path,params)
+		return URI(String(domain<<"#{path}?".concat(params.collect{|k,v|"#{k}=#{CGI::escape(v.to_s)}" unless v==nil}.join('&'))))
+	end
+	public
+	def initialize(c,a)
+		@CONSUMER=c;@APITOKEN=a
+		url = URI("https://api.twitter.com/1.1/account/verify_credentials.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		raise("Invalid credentials") if response.code[0]=='4'
+		raise("Server goofed up") if response.code[0]=='5'
+	end
+	
+#ctg######
+# search #
+##########
+
+	def search(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/search/tweets.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	
+#ctg########
+# statuses #
+############
+
+	def getTimelineMentions(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/mentions_timeline.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getUserTimeline(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/user_timeline.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getHomeTimeline(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/home_timeline.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getRetweetsOfMe(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/retweets_of_me.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getRetweetsById(params={})
+		ensureArgs({params => Hash})
+		id = params["id"];params["id"]=nil
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/retweets/#{id}.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def showStatusById(params={})
+		ensureArgs({params => Hash})
+		id = params["id"];params["id"]=nil
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/show/#{id}.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def destroyStatusById(params={})
+		ensureArgs({params => Hash})
+		id = params["id"];params["id"]=nil
+		url = URI("https://api.twitter.com/1.1/statuses/destroy/#{id}.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def updateStatus(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/statuses/update.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(params)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def retweetStatusById(params={})
+		ensureArgs({params => Hash})
+		id = params["id"];params["id"]=nil
+		url = URI("https://api.twitter.com/1.1/statuses/retweet/#{id}.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def unretweetStatusById(params={})
+		ensureArgs({params => Hash})
+		id = params["id"];params["id"]=nil
+		url = URI("https://api.twitter.com/1.1/statuses/unretweet/#{id}.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getStatusOembed(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://publish.twitter.com","/oembed.json",params)
+		response = HTTP.get(url)
+		return response
+	end
+	def getRetweeterIds(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/retweeters/ids.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def lookupStatus(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/statuses/lookup.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(params)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	
+#ctg################
+#  direct messages #
+####################
+
+	def getSentMessages(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/direct_messages/sent.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def showMessage(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/direct_messages/show.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getMessages(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/direct_messages.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def destroyMessageById(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/direct_messages/destroy.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def newDirectMessage(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/direct_messages/new.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	
+#ctg###########
+# friendships #
+###############
+	
+	def getFriendsNoRtsIds(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/no_retweets/ids.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getIncomingFriendships(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/incoming.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getOutgoingFriendships(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/outgoing.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def followUser(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/friendships/create.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def unfollowUser(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/friendships/destroy.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def updateFriendships(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/update.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def showFriendships(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/show.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def lookupFriendships(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/lookup.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	
+#ctg###################
+# friends / followers #
+#######################
+
+	def getFriendIds(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friends/ids.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getFollowerIds(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/followers/ids.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getFriendList(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/friends/list.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getFollowerList(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/followers/list.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+
+#ctg#######
+# account #
+###########
+
+	def postAccountSettings(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/account/settings.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response	
+	end
+	def updateProfile(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/account/update_profile.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response	
+	end
+	def updateProfileImage(params={})
+		raise("Sorry, \"#{__method__}\" is not available yet. I'm working on it.")
+		#/account/update_profile_image.json
+	end
+	
+#ctg######
+# blocks #
+##########
+	
+	def getBlockList(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/blocks/list.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def getBlockIds(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/blocks/ids.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def blockUser(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/blocks/create.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def unblockUser(params={})
+		ensureArgs({params => Hash})
+		url = URI("https://api.twitter.com/1.1/blocks/destroy.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.set_form_data(updatePost)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	
+#ctg#####
+# users #
+#########
+
+	def lookupUsers(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/users/lookup.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def showUser(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/users/show.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def searchUsers(params={})
+		ensureArgs({params => Hash})
+		url = paramsGetRq("https://api.twitter.com","/1.1/users/search.json",params)
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Get.new(url.request_uri)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response
+	end
+	def userSlug(params={})
+		raise("Sorry, \"#{__method__}\" is not available yet. I'm working on it.")
+	end
+end
