@@ -7,15 +7,18 @@ class TwitterAPI
 	require 'cgi'
 	include Net
 	private
+	
 	def ensureArgs(spec);return false unless spec.is_a?(Hash);spec.each_key{|k|(raise(ArgumentError, "Request parameters not in a hash")) unless k.is_a?(spec[k])};return true;end
 	def key?(a,k);a[k]==nil ? false : true;end
 	def updatePost(*k);rqs=Hash.new;k.each{|hk|rqs[hk]=k[hk] if k[hk]!=nil};return rqs;end
 	def paramsGetRq(domain,path,params)
 		return URI(String(domain<<"#{path}?".concat(params.collect{|k,v|"#{k}=#{CGI::escape(v.to_s)}" unless v==nil}.join('&'))))
 	end
+	
+	
 	public
 	def initialize(c,a)
-		@CONSUMER=c;@APITOKEN=a
+		@CONSUMER=c;@APITOKEN=a;@f4f=false
 		url = URI("https://api.twitter.com/1.1/account/verify_credentials.json")
 		http = HTTP.new(url.host, url.port)
 		http.use_ssl = true
@@ -1024,5 +1027,25 @@ class TwitterAPI
 		request.oauth!(http,@CONSUMER,@APITOKEN)
 		response=nil;http.start{response=http.request(request)}
 		return response
+	end
+	
+#etc
+	private;def fl
+		x = getFollowerList
+		loop do
+			y = getFollowerList
+			if x!=[]&&y!=x
+				x["users"].length.times{y["users"].pop}
+				y["users"].each{|user|followUser("screen_name" => user["screen_name"]);sleep 5}
+			end
+			x = getFollowerList
+			sleep 5
+		end
+	end;public
+	
+	attr_reader :f4f
+	def f4f=(v)
+		v==true||v==false ? @f4f=v : raise(ArgumentError, "Not a bool")
+		@f4f ? @@follower_listen=Thread.new{fl} : (@@follower_listen.kill rescue nil)
 	end
 end

@@ -9,6 +9,7 @@ f.each do |l|
 		ctg = f[counter+1].split(" ");ctg.shift;ctg.pop;ctg=ctg.join(" ")
 		puts "new Category = \"#{ctg}\""
 		methods[ctg]={} if methods[ctg]==nil
+	elsif l.match(/^\#+\s*etc\s*$/);pv=true
 	elsif l.match(/^\s*def.+/)&&!pv
 		method_name = l.split("def ")[-1].match(/^\S+\(/).to_s.chop
 		if method_name == "initialize"
