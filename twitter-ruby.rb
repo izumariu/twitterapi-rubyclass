@@ -34,10 +34,6 @@ class TwitterAPI
 		raise("Server goofed up") if response.code[0]=='5'
 	end
 	
-#ctg###################
-# easier constructing #
-#######################
-	
 	def self.autoConstruct
 		return self.new(($consumer_key||OAuth::Consumer.new("","")),($access_token||OAuth::Token.new("","")))
 	end
