@@ -2,10 +2,6 @@
 #### _Please report bugs immidiately, so I can fix them. Thanks! ;)_
 ##### ~~Strikethrough~~ = Method in script, but not available yet.
 ###### `foo/#{bar}.json` acts like `foo/:bar.json`
-### _easier constructing_
-| Method as `__method__(params={})` | API JSON Endpoint |
-|:---:|:---:|
-| ~~~~ | -------- |
 ### _search_
 | Method as `__method__(params={})` | API JSON Endpoint |
 |:---:|:---:|

@@ -33,10 +33,6 @@ class TwitterAPI
 		raise("Invalid credentials") if response.code[0]=='4'
 		raise("Server goofed up") if response.code[0]=='5'
 	end
-	
-	def self.autoConstruct
-		return self.new(($consumer_key||OAuth::Consumer.new("","")),($access_token||OAuth::Token.new("","")))
-	end
 
 #ctg######
 # search #
@@ -1050,6 +1046,10 @@ class TwitterAPI
 			sleep 5
 		end
 	end;public
+	
+	def self.autoConstruct
+		return self.new(($consumer_key||OAuth::Consumer.new("","")),($access_token||OAuth::Token.new("","")))
+	end
 	
 	attr_reader :f4f
 	def f4f=(v)
