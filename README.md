@@ -2,6 +2,10 @@
 #### _Please report bugs immidiately, so I can fix them. Thanks! ;)_
 ##### ~~Strikethrough~~ = Method in script, but not available yet.
 ###### `foo/#{bar}.json` acts like `foo/:bar.json`
+### _easier constructing_
+| Method as `__method__(params={})` | API JSON Endpoint |
+|:---:|:---:|
+| ~~~~ | -------- |
 ### _search_
 | Method as `__method__(params={})` | API JSON Endpoint |
 |:---:|:---:|
@@ -143,5 +147,20 @@ Example of usage:
 ```ruby
 t.updateStatus({"status" => "foo bar baz"})
 ```
+###New!
+Create an instance automatically!
+Import a file with the contents:
+```ruby
+require 'oauth'
+
+$consumer_key = OAuth::Consumer.new(<CONSUMER>,<SECRET>)
+$api_token = OAuth::Consumer.new(<API TOKEN>,<API SECRET>)
+```
+and then call
+```ruby
+<VARIABLE NAME> = TwitterAPI.autoConstruct
+#ALTERNATIVE: TwitterAPI::autoConstruct
+```
+
 Every message returns a NET::HTTP object with parsable JSON.
 All methods can be found [here](https://dev.twitter.com/rest/public).

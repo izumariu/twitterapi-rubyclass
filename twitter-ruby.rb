@@ -1,11 +1,15 @@
 #!/usr/bin/ruby
 
 class TwitterAPI
+	@moduleerrors=false
 	require 'net/http'
-	require 'json'
-	require 'oauth'
-	require 'cgi'
+	require 'json' rescue (puts "No JSON module found.";@moduleerrors=true)
+	require 'oauth' rescue (puts "No OAuth module found.";@moduleerrors=true)
+	require 'cgi' rescue (puts "No CGI module found.";@moduleerrors=true)
 	include Net
+
+	@moduleerrors&&(puts "^^--Please install the missing modules--^^";raise RuntimeError)
+
 	private
 	
 	def ensureArgs(spec);return false unless spec.is_a?(Hash);spec.each_key{|k|(raise(ArgumentError, "Request parameters not in a hash")) unless k.is_a?(spec[k])};return true;end
@@ -30,6 +34,14 @@ class TwitterAPI
 		raise("Server goofed up") if response.code[0]=='5'
 	end
 	
+#ctg###################
+# easier constructing #
+#######################
+	
+	def self.autoConstruct
+		return self.new(($consumer_key||OAuth::Consumer.new("","")),($access_token||OAuth::Token.new("","")))
+	end
+
 #ctg######
 # search #
 ##########
