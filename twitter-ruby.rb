@@ -1057,13 +1057,10 @@ class TwitterAPI
 	private;def fl
 		x = getFollowerList
 		loop do
-			y = getFollowerList
-			if x!=[]&&y!=x
-				x["users"].length.times{y["users"].pop}
-				y["users"].each{|user|followUser("screen_name" => user["screen_name"]);sleep 5}
+			getFollowerList["users"].each do |user|
+				followUser("screen_name" => user["screen_name"])
 			end
-			x = getFollowerList
-			sleep 5
+			sleep 30
 		end
 	end;public
 	
