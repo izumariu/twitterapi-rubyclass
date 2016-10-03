@@ -129,6 +129,10 @@
 | getSupportedLangs | /help/languages.json |
 | getPrivacyPolicy | /help/privacy.json |
 | getTermsOfService | /help/tos.json |
+### _media_
+| Method as `__method__(params={})` | API JSON Endpoint |
+|:---:|:---:|
+| ~~uploadImage~~ | -------- |
 
 
 ---
