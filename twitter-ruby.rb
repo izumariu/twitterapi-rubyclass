@@ -1033,6 +1033,26 @@ class TwitterAPI
 		return response
 	end
 	
+#ctg#####
+# media #
+#########
+
+	def uploadImage(file)
+		ensureArgs({file => String})
+		require 'base64'
+		enc = Base64.encode64(File.open(file,"rb").read)
+		url = URI("https://upload.twitter.com/1.1/media/upload.json")
+		http = HTTP.new(url.host, url.port)
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+		request = HTTP::Post.new(url.request_uri)
+		request.content_type = 'multipart/form-data'
+		request.set_form_data("media"=>enc)
+		request.oauth!(http,@CONSUMER,@APITOKEN)
+		response=nil;http.start{response=http.request(request)}
+		return response	
+	end
+
 #etc
 	private;def fl
 		x = getFollowerList
