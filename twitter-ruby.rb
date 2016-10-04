@@ -303,24 +303,22 @@ class TwitterAPI
 	end
 	def followUser(params={})
 		ensureArgs({params => Hash})
-		url = URI("https://api.twitter.com/1.1/friendships/create.json")
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/create.json",params)
 		http = HTTP.new(url.host, url.port)
 		http.use_ssl = true
 		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
 		request = HTTP::Post.new(url.request_uri)
-		request.set_form_data(updatePost)
 		request.oauth!(http,@CONSUMER,@APITOKEN)
 		response=nil;http.start{response=http.request(request)}
 		return response
 	end
 	def unfollowUser(params={})
 		ensureArgs({params => Hash})
-		url = URI("https://api.twitter.com/1.1/friendships/destroy.json")
+		url = paramsGetRq("https://api.twitter.com","/1.1/friendships/destroy.json",params)
 		http = HTTP.new(url.host, url.port)
 		http.use_ssl = true
 		http.verify_mode = OpenSSL::SSL::VERIFY_PEER
 		request = HTTP::Post.new(url.request_uri)
-		request.set_form_data(updatePost)
 		request.oauth!(http,@CONSUMER,@APITOKEN)
 		response=nil;http.start{response=http.request(request)}
 		return response
@@ -1055,12 +1053,17 @@ class TwitterAPI
 
 #etc
 	private;def fl
-		x = getFollowerList
+		x = getFollowerIds["ids"]
+		y = []
 		loop do
-			getFollowerList["users"].each do |user|
-				followUser("screen_name" => user["screen_name"])
+			if x!=y
+				y.each do |user_id_current|
+					followUser("user_id" => user_id_current)
+				end
+				x = y
 			end
-			sleep 30
+			sleep 10
+			y = getFollowerIds["ids"]
 		end
 	end;public
 	
